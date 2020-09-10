@@ -16,9 +16,8 @@ const (
 
 //Hubby ...
 type Hubby struct {
-	Client  *http.Client
-	auth    string
-	baseurl string
+	client *http.Client
+	auth   string
 }
 
 func basicAuth(username, password string) string {
@@ -30,22 +29,22 @@ func basicAuth(username, password string) string {
 func New(clientid string, clientsecret string, client *http.Client) *Hubby {
 
 	api := Hubby{
-		auth:    basicAuth(clientid, clientsecret),
-		Client:  client,
-		baseurl: baseURL,
+		auth:   basicAuth(clientid, clientsecret),
+		client: client,
 	}
 	return &api
 }
 
 //GetDomains ...
 func (a *Hubby) GetDomains() ([]Domain, error) {
-
-	req, err := http.NewRequest("GET", a.baseurl+"/domains", nil)
+	url := fmt.Sprintf("%v/domains", baseURL)
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("User-Agent", "ravndaa/hubby")
 	req.Header.Add("Authorization", "Basic "+a.auth)
-	resp, err := a.Client.Do(req)
+	resp, err := a.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -70,14 +69,15 @@ func (a *Hubby) GetDomains() ([]Domain, error) {
 
 //GetDomainDNSRecords ...
 func (a *Hubby) GetDomainDNSRecords(domainid int) ([]DNSRecord, error) {
-	url := fmt.Sprintf("https://api.domeneshop.no/v0/domains/%v/dns", domainid)
+	url := fmt.Sprintf("%v/domains/%v/dns", baseURL, domainid)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("User-Agent", "ravndaa/hubby")
 	req.Header.Add("Authorization", "Basic "+a.auth)
-	resp, err := a.Client.Do(req)
+	resp, err := a.client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -98,8 +98,8 @@ func (a *Hubby) GetDomainDNSRecords(domainid int) ([]DNSRecord, error) {
 
 //AddDNSRecord ...
 func (a *Hubby) AddDNSRecord(domainid int, value DNSRecord) error {
-	url := fmt.Sprintf("https://api.domeneshop.no/v0/domains/%v/dns", domainid)
-	//url := "https://hookb.in/kxJdEzRMoVcrOOoLbylJ"
+	url := fmt.Sprintf("%v/domains/%v/dns", baseURL, domainid)
+
 	payload := new(bytes.Buffer)
 	json.NewEncoder(payload).Encode(value)
 
@@ -108,9 +108,9 @@ func (a *Hubby) AddDNSRecord(domainid int, value DNSRecord) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "homemade")
+	req.Header.Set("User-Agent", "ravndaa/hubby")
 	req.Header.Add("Authorization", "Basic "+a.auth)
-	resp, err := a.Client.Do(req)
+	resp, err := a.client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -126,16 +126,48 @@ func (a *Hubby) AddDNSRecord(domainid int, value DNSRecord) error {
 
 }
 
+//UpdateDNSRecord ...
+func (a *Hubby) UpdateDNSRecord(domainid int, dnsrecordid int, value DNSRecord) error {
+	url := fmt.Sprintf("%v/domains/%v/dns/%v", baseURL, domainid, dnsrecordid)
+
+	payload := new(bytes.Buffer)
+	json.NewEncoder(payload).Encode(value)
+
+	req, err := http.NewRequest("PUT", url, payload)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("User-Agent", "ravndaa/hubby")
+	req.Header.Add("Authorization", "Basic "+a.auth)
+	resp, err := a.client.Do(req)
+	if err != nil {
+		return err
+	}
+	if resp.Body != nil {
+		defer resp.Body.Close()
+	}
+	body, readErr := ioutil.ReadAll(resp.Body)
+	if readErr != nil {
+		return err
+	}
+	if resp.StatusCode != 204 {
+
+		return fmt.Errorf("%s", body)
+	}
+	return nil
+}
+
 //DeleteDNSRecord ...
 func (a *Hubby) DeleteDNSRecord(domainid int, dnsrecordid int) error {
-	url := fmt.Sprintf("https://api.domeneshop.no/v0/domains/%v/dns/%v", domainid, dnsrecordid)
+	url := fmt.Sprintf("%v/domains/%v/dns/%v", baseURL, domainid, dnsrecordid)
 
 	req, err := http.NewRequest("DELETE", url, nil)
 	if err != nil {
 		return err
 	}
+	req.Header.Set("User-Agent", "ravndaa/hubby")
 	req.Header.Add("Authorization", "Basic "+a.auth)
-	resp, err := a.Client.Do(req)
+	resp, err := a.client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -156,14 +188,6 @@ type Domain struct {
 //DNSRecord ...
 type DNSRecord struct {
 	ID   int    `json:"id,omitempty"`
-	Host string `json:"host"`
-	TTL  int    `json:"ttl"`
-	Type string `json:"type"`
-	Data string `json:"data"`
-}
-
-//NewDNSRecord ...
-type NewDNSRecord struct {
 	Host string `json:"host"`
 	TTL  int    `json:"ttl"`
 	Type string `json:"type"`

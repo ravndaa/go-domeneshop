@@ -52,6 +52,30 @@ func TestDeleteDNSRecord(t *testing.T) {
 
 }
 
+func TestUpdateDNSRecord(t *testing.T) {
+
+	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "Basic c3RpYW46c3RpYW4=", r.Header.Get("Authorization"))
+		w.WriteHeader(204)
+		w.Write([]byte(""))
+	})
+
+	httpClient, teardown := testingHTTPClient(h)
+	defer teardown()
+
+	payload := DNSRecord{
+		Host: "",
+		TTL:  3600,
+		Type: "A",
+		Data: "1.1.1.1",
+	}
+	api := New("stian", "stian", httpClient)
+	err := api.UpdateDNSRecord(99, 99, payload)
+	assert.Nil(t, err)
+
+}
+
+//need some love..
 const (
 	okResponse = `[
 		{"id": 1, "domain": "lus.re", "status":"active"}
