@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -138,17 +139,8 @@ func (a *Hubby) DeleteDNSRecord(domainid int, dnsrecordid int) error {
 	if err != nil {
 		return err
 	}
-	if resp.Body != nil {
-		defer resp.Body.Close()
-	}
-	body, readErr := ioutil.ReadAll(resp.Body)
-	if readErr != nil {
-		return err
-	}
-	records := []DNSRecord{}
-	err = json.Unmarshal(body, &records)
-	if err != nil {
-		return err
+	if resp.StatusCode != 204 {
+		return errors.New("noe gikk galt")
 	}
 
 	return nil
