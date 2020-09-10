@@ -39,7 +39,8 @@ func TestDeleteDNSRecord(t *testing.T) {
 
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "Basic c3RpYW46c3RpYW4=", r.Header.Get("Authorization"))
-		w.Write([]byte(okResponse))
+		w.WriteHeader(204)
+		w.Write([]byte(""))
 	})
 
 	httpClient, teardown := testingHTTPClient(h)
