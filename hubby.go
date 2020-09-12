@@ -185,8 +185,8 @@ type Domain struct {
 	Status         string `json:"status"`
 	ExpiryDate     string `json:"expiry_date"`
 	RegisteredDate string `json:"registered_date"`
-	//Renew          bool   `json:"renew"`
-	Registrant string `json:"registrant"`
+	Renew          bool   `json:"renew"`
+	Registrant     string `json:"registrant"`
 }
 
 //DNSRecord ...
