@@ -180,9 +180,13 @@ func (a *Hubby) DeleteDNSRecord(domainid int, dnsrecordid int) error {
 
 //Domain ..
 type Domain struct {
-	ID     int    `json:"id"`
-	Domain string `json:"domain"`
-	Status string `json:"status"`
+	ID             int    `json:"id"`
+	Domain         string `json:"domain"`
+	Status         string `json:"status"`
+	ExpiryDate     string `json:"expiry_date"`
+	RegisteredDate string `json:"registered_date"`
+	Renew          string `json:"renew"`
+	Registrant     string `json:"registrant"`
 }
 
 //DNSRecord ...
