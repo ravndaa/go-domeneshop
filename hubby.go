@@ -27,7 +27,7 @@ func basicAuth(username, password string) string {
 
 //New domeneshop client.
 func New(clientid string, clientsecret string, client *http.Client) *Hubby {
-
+	fmt.Println(basicAuth(clientid, clientsecret))
 	api := Hubby{
 		auth:   basicAuth(clientid, clientsecret),
 		client: client,
@@ -196,7 +196,7 @@ type DNSRecord struct {
 	TTL      int    `json:"ttl,omitempty"`
 	Type     string `json:"type,omitempty"`
 	Data     string `json:"data,omitempty"`
-	Priority int    `json:"priority,omitempty"`
-	Weight   int    `json:"weight,omitempty"`
-	Port     int    `json:"port,omitempty"`
+	Priority string `json:"priority,omitempty"`
+	Weight   string `json:"weight,omitempty"`
+	Port     string `json:"port,omitempty"`
 }
