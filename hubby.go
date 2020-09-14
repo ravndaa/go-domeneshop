@@ -191,9 +191,12 @@ type Domain struct {
 
 //DNSRecord ...
 type DNSRecord struct {
-	ID   int    `json:"id,omitempty"`
-	Host string `json:"host"`
-	TTL  int    `json:"ttl"`
-	Type string `json:"type"`
-	Data string `json:"data"`
+	ID       int    `json:"id,omitempty"`
+	Host     string `json:"host"`
+	TTL      int    `json:"ttl"`
+	Type     string `json:"type"`
+	Data     string `json:"data"`
+	Priority int16  `json:"priority"`
+	Weight   int16  `json:"weight"`
+	Port     int16  `json:"port"`
 }
