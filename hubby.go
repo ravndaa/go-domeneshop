@@ -196,7 +196,7 @@ type DNSRecord struct {
 	TTL      int    `json:"ttl,omitempty"`
 	Type     string `json:"type,omitempty"`
 	Data     string `json:"data,omitempty"`
-	Priority int16  `json:"priority,omitempty"`
-	Weight   int16  `json:"weight,omitempty"`
-	Port     int16  `json:"port,omitempty"`
+	Priority int    `json:"priority,omitempty"`
+	Weight   int    `json:"weight,omitempty"`
+	Port     int    `json:"port,omitempty"`
 }
