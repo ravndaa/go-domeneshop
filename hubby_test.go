@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// HttpTest Recorder.
 type ClientMock struct{}
 
 func TestGetDomains(t *testing.T) {

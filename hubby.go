@@ -1,7 +1,6 @@
 package hubby
 
 import (
-	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -10,14 +9,9 @@ import (
 	"net/http"
 )
 
-const (
-	baseURL = "https://api.domeneshop.no/v0"
-)
-
 //Hubby ...
 type Hubby struct {
-	client *http.Client
-	auth   string
+	client *myhttp
 }
 
 func basicAuth(username, password string) string {
@@ -27,27 +21,25 @@ func basicAuth(username, password string) string {
 
 //New domeneshop client.
 func New(clientid string, clientsecret string, client *http.Client) *Hubby {
+	if client == nil {
+		client = &http.Client{}
+	}
+
+	apiclient := &myhttp{
+		client: client,
+		auth:   basicAuth(clientid, clientsecret),
+	}
 
 	api := Hubby{
-		auth:   basicAuth(clientid, clientsecret),
-		client: client,
+		client: apiclient,
 	}
 	return &api
 }
 
 //GetDomains ...
 func (a *Hubby) GetDomains() ([]Domain, error) {
-	url := fmt.Sprintf("%v/domains", baseURL)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("User-Agent", "ravndaa/hubby")
-	req.Header.Add("Authorization", "Basic "+a.auth)
-	resp, err := a.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
+
+	resp, err := a.client.GET("/domains")
 	if resp.Body != nil {
 		defer resp.Body.Close()
 	}
@@ -75,26 +67,16 @@ func (a *Hubby) FindDomain(domainid string) ([]Domain, error) { return nil, nil 
 
 //ListDNSRecords ...
 func (a *Hubby) ListDNSRecords(domainid int, host string, dnstype string) ([]DNSRecord, error) {
-	url := fmt.Sprintf("%v/domains/%v/dns", baseURL, domainid)
-	// add some queries if not empty
+	// make it cleaner net/url pacjage ?
+	path := fmt.Sprintf("/domains/%v/dns", domainid)
 	if dnstype != "" && host != "" {
-		url = fmt.Sprintf("%v?host=%v&type=%v", url, host, dnstype)
+		path = fmt.Sprintf("%v?host=%v&type=%v", path, host, dnstype)
 	} else if host != "" {
-		url = fmt.Sprintf("%v?host=%v", url, host)
+		path = fmt.Sprintf("%v?host=%v", path, host)
 	} else if dnstype != "" {
-		url = fmt.Sprintf("%v?typ=%v", url, dnstype)
+		path = fmt.Sprintf("%v?type=%v", path, dnstype)
 	}
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	// Set some request header data, one required and one for the fun.
-	req.Header.Set("User-Agent", "ravndaa/hubby")
-	req.Header.Add("Authorization", "Basic "+a.auth)
-
-	// ask the api nicely to get some dns records.
-	resp, err := a.client.Do(req)
+	resp, err := a.client.GET(path)
 	if err != nil {
 		return nil, err
 	}
@@ -116,48 +98,46 @@ func (a *Hubby) ListDNSRecords(domainid int, host string, dnstype string) ([]DNS
 	return records, nil
 }
 
-//AddDNSRecord ...
-func (a *Hubby) AddDNSRecord(domainid int, value DNSRecord) error {
-	url := fmt.Sprintf("%v/domains/%v/dns", baseURL, domainid)
-
-	if value.Host == "" {
-		return errors.New("missing host")
+// Validate DNSRecord before sending it.
+func validateDNSRecord(record DNSRecord) bool {
+	if record.Host == "" {
+		return false
 	}
-	if value.Type == "" {
-		return errors.New("mssing type")
+	if record.Type == "" {
+		return false
 	}
-	if value.Data == "" {
-		return errors.New("missing data")
+	if record.Data == "" {
+		return false
 	}
 
-	switch DNSType := value.Type; DNSType {
+	switch DNSType := record.Type; DNSType {
 	case "MX":
-		if value.Priority == "" {
-			return errors.New("missing priority")
+		if record.Priority == "" {
+			return false
 		}
 	case "SRV":
-		if value.Priority == "" {
-			return errors.New("missing priority")
+		if record.Priority == "" {
+			return false
 		}
-		if value.Weight == "" {
-			return errors.New("missing weight")
+		if record.Weight == "" {
+			return false
 		}
-		if value.Port == "" {
-			return errors.New("missing port")
+		if record.Port == "" {
+			return false
 		}
 	}
+	return true
+}
 
-	payload := new(bytes.Buffer)
-	json.NewEncoder(payload).Encode(value)
+//AddDNSRecord ...
+func (a *Hubby) AddDNSRecord(domainid int, value DNSRecord) error {
 
-	req, err := http.NewRequest("POST", url, payload)
-	if err != nil {
-		return err
+	if validateDNSRecord(value) == false {
+		return errors.New(ErrMissingRequiredField)
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "ravndaa/hubby")
-	req.Header.Add("Authorization", "Basic "+a.auth)
-	resp, err := a.client.Do(req)
+
+	path := fmt.Sprintf("/domains/%v/dns", domainid)
+	resp, err := a.client.POST(path, value)
 	if err != nil {
 		return err
 	}
@@ -180,18 +160,9 @@ func (a *Hubby) AddDNSRecord(domainid int, value DNSRecord) error {
 
 //UpdateDNSRecord ...
 func (a *Hubby) UpdateDNSRecord(domainid int, dnsrecordid int, value DNSRecord) error {
-	url := fmt.Sprintf("%v/domains/%v/dns/%v", baseURL, domainid, dnsrecordid)
 
-	payload := new(bytes.Buffer)
-	json.NewEncoder(payload).Encode(value)
-
-	req, err := http.NewRequest("PUT", url, payload)
-	if err != nil {
-		return err
-	}
-	req.Header.Set("User-Agent", "ravndaa/hubby")
-	req.Header.Add("Authorization", "Basic "+a.auth)
-	resp, err := a.client.Do(req)
+	url := fmt.Sprintf("/domains/%v/dns/%v", domainid, dnsrecordid)
+	resp, err := a.client.PUT(url, value)
 	if err != nil {
 		return err
 	}
@@ -211,20 +182,14 @@ func (a *Hubby) UpdateDNSRecord(domainid int, dnsrecordid int, value DNSRecord) 
 
 //DeleteDNSRecord ...
 func (a *Hubby) DeleteDNSRecord(domainid int, dnsrecordid int) error {
-	url := fmt.Sprintf("%v/domains/%v/dns/%v", baseURL, domainid, dnsrecordid)
+	url := fmt.Sprintf("/domains/%v/dns/%v", domainid, dnsrecordid)
 
-	req, err := http.NewRequest("DELETE", url, nil)
+	resp, err := a.client.DELETE(url)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("User-Agent", "ravndaa/hubby")
-	req.Header.Add("Authorization", "Basic "+a.auth)
-	resp, err := a.client.Do(req)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode != 204 {
-		return errors.New("noe gikk galt")
+	if resp.StatusCode >= 300 {
+		return errors.New(ErrNotSureYet)
 	}
 
 	return nil
@@ -246,7 +211,7 @@ type Domain struct {
 //Service ...
 type Service struct {
 	Registrar bool   `json:"registrar"`
-	Dns       bool   `json:"dns"`
+	DNS       bool   `json:"dns"`
 	Email     bool   `json:"email"`
 	Webhotel  string `json:"webhotel"`
 }
@@ -262,3 +227,10 @@ type DNSRecord struct {
 	Weight   string `json:"weight,omitempty"`
 	Port     string `json:"port,omitempty"`
 }
+
+const (
+	//ErrMissingRequiredField used for checking fields required.
+	ErrMissingRequiredField = "missing required field"
+	//ErrNotSureYet ...
+	ErrNotSureYet = "not sure what happend."
+)
