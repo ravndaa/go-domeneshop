@@ -1,7 +1,7 @@
 ## go-domeneshop v0.0.8
 ### simple domain.shop dns library
 
-![Go](https://github.com/ravndaa/hubby/workflows/Go/badge.svg)
+![Go](https://github.com/ravndaa/go-domeneshop/workflows/Go/badge.svg)
 
 Docs: https://api.domeneshop.no/docs/
 
