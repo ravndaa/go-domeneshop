@@ -1,4 +1,4 @@
-## go-domeneshop v0.0.8
+## go-domeneshop
 ### simple domain.shop dns library
 
 ![Go](https://github.com/ravndaa/go-domeneshop/workflows/Go/badge.svg)
