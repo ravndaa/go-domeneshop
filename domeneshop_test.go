@@ -27,6 +27,7 @@ func TestGetDomains(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "Basic c3RpYW46c3RpYW4=", r.Header.Get("Authorization"))
 		assert.Equal(t, "GET", r.Method)
+		assert.Equal(t, "/v0/domains", r.RequestURI)
 		_, err := w.Write([]byte(okResponse))
 		if err != nil {
 			fmt.Println(err)
