@@ -1,4 +1,4 @@
-package hubby
+package domeneshop
 
 import (
 	"bytes"
