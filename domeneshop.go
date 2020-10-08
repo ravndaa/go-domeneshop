@@ -1,4 +1,4 @@
-package hubby
+package domeneshop
 
 import (
 	"encoding/base64"
@@ -9,8 +9,8 @@ import (
 	"net/http"
 )
 
-//Hubby ...
-type Hubby struct {
+//Domeneshop ...
+type Domeneshop struct {
 	client *myhttp
 }
 
@@ -20,7 +20,7 @@ func basicAuth(username, password string) string {
 }
 
 //New domeneshop client.
-func New(clientid string, clientsecret string, client *http.Client) *Hubby {
+func New(clientid string, clientsecret string, client *http.Client) *Domeneshop {
 	if client == nil {
 		client = &http.Client{}
 	}
@@ -30,14 +30,14 @@ func New(clientid string, clientsecret string, client *http.Client) *Hubby {
 		auth:   basicAuth(clientid, clientsecret),
 	}
 
-	api := Hubby{
+	api := Domeneshop{
 		client: apiclient,
 	}
 	return &api
 }
 
 //GetDomains ...
-func (a *Hubby) GetDomains() ([]Domain, error) {
+func (a *Domeneshop) GetDomains() ([]Domain, error) {
 
 	resp, err := a.client.GET("/domains")
 	if resp.Body != nil {
@@ -60,13 +60,13 @@ func (a *Hubby) GetDomains() ([]Domain, error) {
 }
 
 //FindDomains with filter
-func (a *Hubby) FindDomains(filter string) ([]Domain, error) { return nil, nil }
+func (a *Domeneshop) FindDomains(filter string) ([]Domain, error) { return nil, nil }
 
 //FindDomain using id
-func (a *Hubby) FindDomain(domainid string) ([]Domain, error) { return nil, nil }
+func (a *Domeneshop) FindDomain(domainid string) ([]Domain, error) { return nil, nil }
 
 //ListDNSRecords ...
-func (a *Hubby) ListDNSRecords(domainid int, host string, dnstype string) ([]DNSRecord, error) {
+func (a *Domeneshop) ListDNSRecords(domainid int, host string, dnstype string) ([]DNSRecord, error) {
 	// make it cleaner net/url pacjage ?
 	path := fmt.Sprintf("/domains/%v/dns", domainid)
 	if dnstype != "" && host != "" {
@@ -130,7 +130,7 @@ func validateDNSRecord(record DNSRecord) bool {
 }
 
 //AddDNSRecord ...
-func (a *Hubby) AddDNSRecord(domainid int, value DNSRecord) error {
+func (a *Domeneshop) AddDNSRecord(domainid int, value DNSRecord) error {
 
 	if validateDNSRecord(value) == false {
 		return errors.New(ErrMissingRequiredField)
@@ -159,7 +159,7 @@ func (a *Hubby) AddDNSRecord(domainid int, value DNSRecord) error {
 }
 
 //UpdateDNSRecord ...
-func (a *Hubby) UpdateDNSRecord(domainid int, dnsrecordid int, value DNSRecord) error {
+func (a *Domeneshop) UpdateDNSRecord(domainid int, dnsrecordid int, value DNSRecord) error {
 
 	url := fmt.Sprintf("/domains/%v/dns/%v", domainid, dnsrecordid)
 	resp, err := a.client.PUT(url, value)
@@ -181,7 +181,7 @@ func (a *Hubby) UpdateDNSRecord(domainid int, dnsrecordid int, value DNSRecord) 
 }
 
 //DeleteDNSRecord ...
-func (a *Hubby) DeleteDNSRecord(domainid int, dnsrecordid int) error {
+func (a *Domeneshop) DeleteDNSRecord(domainid int, dnsrecordid int) error {
 	url := fmt.Sprintf("/domains/%v/dns/%v", domainid, dnsrecordid)
 
 	resp, err := a.client.DELETE(url)
