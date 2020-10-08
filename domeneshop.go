@@ -86,7 +86,7 @@ func (a *Domeneshop) GetDomains(filter string) ([]Domain, error) {
 		fmt.Println(err)
 	}
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("")
+		return nil, fmt.Errorf("http error: %v", resp.StatusCode)
 	}
 
 	defer resp.Body.Close()
@@ -121,7 +121,7 @@ func (a *Domeneshop) ListDNSRecords(domainid int, host string, dnstype string) (
 		return nil, err
 	}
 	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("")
+		return nil, fmt.Errorf("http error: %v", resp.StatusCode)
 	}
 	// check if return body is nil, or move on.
 	if resp.Body != nil {
@@ -158,7 +158,7 @@ func (a *Domeneshop) AddDNSRecord(domainid int, value DNSRecord) error {
 		defer resp.Body.Close()
 	}
 	if resp.StatusCode != 201 {
-		return fmt.Errorf("")
+		return fmt.Errorf("http error: %v", resp.StatusCode)
 	}
 
 	return nil
@@ -178,7 +178,7 @@ func (a *Domeneshop) UpdateDNSRecord(domainid int, dnsrecordid int, value DNSRec
 
 	if resp.StatusCode != 204 {
 
-		return fmt.Errorf("")
+		return fmt.Errorf("http error: %v", resp.StatusCode)
 	}
 
 	return nil
@@ -193,7 +193,7 @@ func (a *Domeneshop) DeleteDNSRecord(domainid int, dnsrecordid int) error {
 		return err
 	}
 	if resp.StatusCode != 204 {
-		return errors.New(ErrNotSureYet)
+		return fmt.Errorf("http error: %v", resp.StatusCode)
 	}
 
 	return nil
