@@ -6,24 +6,55 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 )
+
+const (
+	//ErrMissingRequiredField used for checking fields required.
+	ErrMissingRequiredField = "missing required field"
+	//ErrNotSureYet ...
+	ErrNotSureYet = "not sure what happend."
+)
+
+//Domain ..
+type Domain struct {
+	ID             int      `json:"id"`
+	Domain         string   `json:"domain"`
+	Status         string   `json:"status"`
+	ExpiryDate     string   `json:"expiry_date"`
+	RegisteredDate string   `json:"registered_date"`
+	Renew          bool     `json:"renew"`
+	Registrant     string   `json:"registrant"`
+	Nameservers    []string `json:"nameservers"`
+	Services       Service  `json:"services"`
+}
+
+//Service ...
+type Service struct {
+	Registrar bool   `json:"registrar"`
+	DNS       bool   `json:"dns"`
+	Email     bool   `json:"email"`
+	Webhotel  string `json:"webhotel"`
+}
+
+//DNSRecord ...
+type DNSRecord struct {
+	ID       int    `json:"id,omitempty"`
+	Host     string `json:"host,omitempty"`
+	TTL      int    `json:"ttl,omitempty"`
+	Type     string `json:"type,omitempty"`
+	Data     string `json:"data,omitempty"`
+	Priority string `json:"priority,omitempty"`
+	Weight   string `json:"weight,omitempty"`
+	Port     string `json:"port,omitempty"`
+}
 
 //Domeneshop ...
 type Domeneshop struct {
 	client *myhttp
 }
 
-func basicAuth(username, password string) string {
-	auth := username + ":" + password
-	return base64.StdEncoding.EncodeToString([]byte(auth))
-}
-
 //New domeneshop client.
-func New(clientid string, clientsecret string, client *http.Client) *Domeneshop {
-	if client == nil {
-		client = &http.Client{}
-	}
+func New(clientid string, clientsecret string) *Domeneshop {
 
 	apiclient := &myhttp{
 		client: client,
@@ -44,8 +75,8 @@ func (a *Domeneshop) GetDomains() ([]Domain, error) {
 		defer resp.Body.Close()
 	}
 
-	body, readErr := ioutil.ReadAll(resp.Body)
-	if readErr != nil {
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
 		return nil, err
 	}
 
@@ -59,15 +90,15 @@ func (a *Domeneshop) GetDomains() ([]Domain, error) {
 
 }
 
-//FindDomains with filter
-func (a *Domeneshop) FindDomains(filter string) ([]Domain, error) { return nil, nil }
+//GetDomains with filter
+func (a *Domeneshop) GetDomains(filter string) ([]Domain, error) { return nil, nil }
 
 //FindDomain using id
 func (a *Domeneshop) FindDomain(domainid string) ([]Domain, error) { return nil, nil }
 
 //ListDNSRecords ...
 func (a *Domeneshop) ListDNSRecords(domainid int, host string, dnstype string) ([]DNSRecord, error) {
-	// make it cleaner net/url pacjage ?
+	// make it cleaner net/url package ?
 	path := fmt.Sprintf("/domains/%v/dns", domainid)
 	if dnstype != "" && host != "" {
 		path = fmt.Sprintf("%v?host=%v&type=%v", path, host, dnstype)
@@ -85,8 +116,8 @@ func (a *Domeneshop) ListDNSRecords(domainid int, host string, dnstype string) (
 		defer resp.Body.Close()
 	}
 	// read the response body since it isnt nil.
-	body, readErr := ioutil.ReadAll(resp.Body)
-	if readErr != nil {
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
 		return nil, err
 	}
 	// create an Dnsrecord array used by json unmarshal.
@@ -195,42 +226,7 @@ func (a *Domeneshop) DeleteDNSRecord(domainid int, dnsrecordid int) error {
 	return nil
 }
 
-//Domain ..
-type Domain struct {
-	ID             int      `json:"id"`
-	Domain         string   `json:"domain"`
-	Status         string   `json:"status"`
-	ExpiryDate     string   `json:"expiry_date"`
-	RegisteredDate string   `json:"registered_date"`
-	Renew          bool     `json:"renew"`
-	Registrant     string   `json:"registrant"`
-	Nameservers    []string `json:"nameservers"`
-	Services       Service  `json:"services"`
+func basicAuth(username, password string) string {
+	auth := username + ":" + password
+	return base64.StdEncoding.EncodeToString([]byte(auth))
 }
-
-//Service ...
-type Service struct {
-	Registrar bool   `json:"registrar"`
-	DNS       bool   `json:"dns"`
-	Email     bool   `json:"email"`
-	Webhotel  string `json:"webhotel"`
-}
-
-//DNSRecord ...
-type DNSRecord struct {
-	ID       int    `json:"id,omitempty"`
-	Host     string `json:"host,omitempty"`
-	TTL      int    `json:"ttl,omitempty"`
-	Type     string `json:"type,omitempty"`
-	Data     string `json:"data,omitempty"`
-	Priority string `json:"priority,omitempty"`
-	Weight   string `json:"weight,omitempty"`
-	Port     string `json:"port,omitempty"`
-}
-
-const (
-	//ErrMissingRequiredField used for checking fields required.
-	ErrMissingRequiredField = "missing required field"
-	//ErrNotSureYet ...
-	ErrNotSureYet = "not sure what happend."
-)
