@@ -1,4 +1,4 @@
-## hubby v0.0.8
+## go-domeneshop v0.0.8
 ### simple domain.shop dns library
 
 ![Go](https://github.com/ravndaa/hubby/workflows/Go/badge.svg)
