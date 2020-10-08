@@ -1,10 +1,10 @@
-## go-domeneshop v0.0.8
+## go-domeneshop
 ### simple domain.shop dns library
 
 ![Go](https://github.com/ravndaa/go-domeneshop/workflows/Go/badge.svg)
 
 Docs: https://api.domeneshop.no/docs/
-
+Create api key: https://www.domeneshop.no/admin?view=api
 
 ### Todo:
 0. learn testing and implement it =)

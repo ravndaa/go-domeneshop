@@ -1,4 +1,4 @@
-module github.com/ravndaa/hubby
+module github.com/ravndaa/go-domeneshop
 
 go 1.15
 
