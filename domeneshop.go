@@ -82,7 +82,9 @@ func (a *Domeneshop) GetDomains(filter string) ([]Domain, error) {
 	}
 	domains := []Domain{}
 	resp, err := a.client.GET(url)
-
+	if err != nil {
+		fmt.Println(err)
+	}
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("")
 	}
@@ -142,7 +144,7 @@ func (a *Domeneshop) ListDNSRecords(domainid int, host string, dnstype string) (
 //AddDNSRecord ...
 func (a *Domeneshop) AddDNSRecord(domainid int, value DNSRecord) error {
 
-	if validateDNSRecord(value) == false {
+	if !validateDNSRecord(value) {
 		return errors.New(ErrMissingRequiredField)
 	}
 
