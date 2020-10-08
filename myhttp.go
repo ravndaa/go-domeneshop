@@ -35,7 +35,10 @@ func (m myhttp) GET(path string) (*http.Response, error) {
 func (m myhttp) POST(path string, data interface{}) (*http.Response, error) {
 	url := fmt.Sprintf("%v%v", baseURL, path)
 	payload := new(bytes.Buffer)
-	json.NewEncoder(payload).Encode(data)
+	err := json.NewEncoder(payload).Encode(data)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	req, err := http.NewRequest("POST", url, payload)
 	if err != nil {
@@ -55,7 +58,10 @@ func (m myhttp) PUT(path string, data interface{}) (*http.Response, error) {
 	url := fmt.Sprintf("%v%v", baseURL, path)
 
 	payload := new(bytes.Buffer)
-	json.NewEncoder(payload).Encode(data)
+	err := json.NewEncoder(payload).Encode(data)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	req, err := http.NewRequest("PUT", url, payload)
 	if err != nil {

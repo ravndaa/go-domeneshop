@@ -18,9 +18,6 @@ Basic testing seems to work, but need to add more tests and error handling.
 
 */
 
-// HttpTest Recorder.
-type ClientMock struct{}
-
 func TestGetDomains(t *testing.T) {
 
 	okResponse := `[
@@ -30,7 +27,10 @@ func TestGetDomains(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "Basic c3RpYW46c3RpYW4=", r.Header.Get("Authorization"))
 		assert.Equal(t, "GET", r.Method)
-		w.Write([]byte(okResponse))
+		_, err := w.Write([]byte(okResponse))
+		if err != nil {
+			fmt.Println(err)
+		}
 	})
 
 	httpClient, teardown := testingHTTPClient(h)
@@ -57,7 +57,10 @@ func TestGetDomainsWithFilter(t *testing.T) {
 		assert.Equal(t, "Basic c3RpYW46c3RpYW4=", r.Header.Get("Authorization"))
 		assert.Equal(t, "/v0/domains?domain=.no", r.RequestURI)
 		assert.Equal(t, "GET", r.Method)
-		w.Write([]byte(okResponse))
+		_, err := w.Write([]byte(okResponse))
+		if err != nil {
+			fmt.Println(err)
+		}
 	})
 
 	httpClient, teardown := testingHTTPClient(h)
@@ -81,7 +84,10 @@ func TestDeleteDNSRecord(t *testing.T) {
 		assert.Equal(t, "Basic c3RpYW46c3RpYW4=", r.Header.Get("Authorization"))
 		assert.Equal(t, "DELETE", r.Method)
 		w.WriteHeader(204)
-		w.Write([]byte(""))
+		_, err := w.Write([]byte(""))
+		if err != nil {
+			fmt.Println(err)
+		}
 	})
 
 	httpClient, teardown := testingHTTPClient(h)
@@ -99,7 +105,10 @@ func TestUpdateDNSRecord(t *testing.T) {
 		assert.Equal(t, "Basic c3RpYW46c3RpYW4=", r.Header.Get("Authorization"))
 		assert.Equal(t, "PUT", r.Method)
 		w.WriteHeader(204)
-		w.Write([]byte(""))
+		_, err := w.Write([]byte(""))
+		if err != nil {
+			fmt.Println(err)
+		}
 	})
 
 	httpClient, teardown := testingHTTPClient(h)
@@ -133,7 +142,10 @@ func TestListDNSRecord(t *testing.T) {
 		assert.Equal(t, "Basic c3RpYW46c3RpYW4=", r.Header.Get("Authorization"))
 		assert.Equal(t, "GET", r.Method)
 		w.WriteHeader(200)
-		w.Write([]byte(okResponse))
+		_, err := w.Write([]byte(okResponse))
+		if err != nil {
+			fmt.Println(err)
+		}
 	})
 
 	httpClient, teardown := testingHTTPClient(h)
@@ -162,7 +174,10 @@ func TestListDNSRecordWithFilters(t *testing.T) {
 		assert.Equal(t, "GET", r.Method)
 		assert.Equal(t, "/v0/domains/1/dns?host=norge.no&type=A", r.RequestURI)
 		w.WriteHeader(200)
-		w.Write([]byte(okResponse))
+		_, err := w.Write([]byte(okResponse))
+		if err != nil {
+			fmt.Println(err)
+		}
 	})
 
 	httpClient, teardown := testingHTTPClient(h)
@@ -190,7 +205,10 @@ func TestAddDNSRecord(t *testing.T) {
 		assert.Equal(t, "POST", r.Method)
 		assert.Equal(t, "/v0/domains/1/dns", r.RequestURI)
 		w.WriteHeader(201)
-		w.Write([]byte(okResponse))
+		_, err := w.Write([]byte(okResponse))
+		if err != nil {
+			fmt.Println(err)
+		}
 	})
 
 	httpClient, teardown := testingHTTPClient(h)
