@@ -84,6 +84,7 @@ func TestDeleteDNSRecord(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, "Basic c3RpYW46c3RpYW4=", r.Header.Get("Authorization"))
 		assert.Equal(t, "DELETE", r.Method)
+assert.Equal(t, "/v0/domains/99/dns/99", r.RequestURI)
 		w.WriteHeader(204)
 		_, err := w.Write([]byte(""))
 		if err != nil {
