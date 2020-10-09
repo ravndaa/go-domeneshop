@@ -7,5 +7,3 @@ Docs: https://api.domeneshop.no/docs/
 Create api key: https://www.domeneshop.no/admin?view=api
 
 ### Todo:
-0. learn testing and implement it =)
-1. Create httpclient for adding required fields used by every request. ()
